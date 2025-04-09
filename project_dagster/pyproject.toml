@@ -1,5 +1,5 @@
 [project]
-name = "project_supinfo"
+name = "project_dagster"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -20,8 +20,8 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.dagster]
-module_name = "project_supinfo.definitions"
-code_location_name = "project_supinfo"
+module_name = "project_dagster.definitions"
+code_location_name = "project_dagster"
 
 [tool.setuptools.packages.find]
-exclude=["project_supinfo_tests"]
+exclude=["project_dagster_tests"]

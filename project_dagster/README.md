@@ -1,16 +1,4 @@
-Metadata-Version: 2.4
-Name: project_supinfo
-Version: 0.1.0
-Summary: Add your description here
-Requires-Python: <3.13,>=3.9
-Description-Content-Type: text/markdown
-Requires-Dist: dagster
-Requires-Dist: dagster-cloud
-Provides-Extra: dev
-Requires-Dist: dagster-webserver; extra == "dev"
-Requires-Dist: pytest; extra == "dev"
-
-# project_supinfo
+# project_dagster
 
 This is a [Dagster](https://dagster.io/) project scaffolded with [`dagster project scaffold`](https://docs.dagster.io/guides/build/projects/creating-a-new-project).
 
@@ -30,7 +18,7 @@ dagster dev
 
 Open http://localhost:3000 with your browser to see the project.
 
-You can start writing assets in `project_supinfo/assets.py`. The assets are automatically loaded into the Dagster code location as you define them.
+You can start writing assets in `project_dagster/assets.py`. The assets are automatically loaded into the Dagster code location as you define them.
 
 ## Development
 
@@ -40,10 +28,10 @@ You can specify new Python dependencies in `setup.py`.
 
 ### Unit testing
 
-Tests are in the `project_supinfo_tests` directory and you can run tests using `pytest`:
+Tests are in the `project_dagster_tests` directory and you can run tests using `pytest`:
 
 ```bash
-pytest project_supinfo_tests
+pytest project_dagster_tests
 ```
 
 ### Schedules and sensors
