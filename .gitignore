@@ -1,7 +1,7 @@
 __pycache__/
 *.pyc
 .env
-dbt_project/target/
-dbt_project/dbt_modules/
-dbt_project/dbt_packages/
+projet_dbt/target/
+projet_dbt/dbt_modules/
+projet_dbt/dbt_packages/
 venv/

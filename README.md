@@ -8,4 +8,7 @@ Pour réaliser ce projet, nous faisons appel à deux datasets possédant les mê
  ATP -> https://www.kaggle.com/datasets/dissfya/atp-tennis-2000-2023daily-pull
  WTA -> https://www.kaggle.com/datasets/dissfya/wta-tennis-2007-2023-daily-update
 
- 
+
+## Organisation du projet 
+### Dagster
+Pour lancer l'interface Dagster, se rendre dans le project_dagster (activer venv avant toute chose) et faire "dagster dev"
