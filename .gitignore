@@ -5,3 +5,4 @@ projet_dbt/target/
 projet_dbt/dbt_modules/
 projet_dbt/dbt_packages/
 venv/
+.tmp_*
