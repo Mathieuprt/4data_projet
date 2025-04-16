@@ -1,0 +1,7 @@
+version: 2
+
+models:
+  - name: stg_matches
+    config:
+      materialized: view
+      tags: ["staging"]

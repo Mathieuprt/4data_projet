@@ -1,0 +1,12 @@
+atp_tennis:
+  target: dev 
+  outputs:
+    dev:
+      type: duckdb
+      path: "atp_tennis.duckdb" 
+      schema: main
+      
+    prod: 
+      type: duckdb
+      path: "/var/data/atp_tennis_prod.duckdb"
+      schema: prod
