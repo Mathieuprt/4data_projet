@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 def atp_data_asset(context):
     """Télécharge les données ATP Tennis"""
     try:
-        # Vérification des credentials via la ressource
         context.log.info("Vérification des credentials Kaggle")
         context.resources.kaggle_credentials
         
