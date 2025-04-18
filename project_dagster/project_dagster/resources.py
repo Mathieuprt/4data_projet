@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 @resource
 def kaggle_credentials_resource(context):
-    """Authentifie avec Kaggle en utilisant kaggle.json"""
+    # Authentifie avec Kaggle en utilisant kaggle.json
     try:
         kaggle_path = r"config/kaggle.json"
         context.log.info(f"Recherche du fichier kaggle.json à: {kaggle_path}")

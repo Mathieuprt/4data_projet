@@ -2,6 +2,11 @@ version: 2
 
 models:
   - name: stg_matches
-    config:
-      materialized: view
-      tags: ["staging"]
+    description: "Matchs filtrés des compétitions ATP depuis 2015"
+    columns:
+      - name: date
+        description: "Date du match"
+      - name: series
+        tests:
+          - accepted_values:
+              values: ['Grand Slam', 'Masters 1000', 'ATP 500', 'ATP 250']

@@ -11,7 +11,6 @@ decomposed_score as (
         split_part(score, ' ', 3) as set_3,
         split_part(score, ' ', 4) as set_4,
         split_part(score, ' ', 5) as set_5,
-        -- Compter le nombre de sets 
         (
             case when score is null or score = '' then 0
                  else array_length(string_split(score, ' '), 1)
@@ -60,3 +59,5 @@ translated as (
         end as round_fr
     from with_prono
 )
+
+select * from translated

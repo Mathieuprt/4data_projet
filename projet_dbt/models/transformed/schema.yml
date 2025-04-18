@@ -2,6 +2,7 @@ version: 2
 
 models:
   - name: match_transforms
-    config:
-      materialized: table
-      tags: ["transformed"]
+    description: "Transformations enrichies avec score décomposé, pronostic et traductions"
+    columns:
+      - name: pronostic
+        description: "Résultat du pronostic basé sur les cotes"

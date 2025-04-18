@@ -1,4 +1,4 @@
-atp_tennis:
+atp_duckdb:
   target: dev 
   outputs:
     dev:
