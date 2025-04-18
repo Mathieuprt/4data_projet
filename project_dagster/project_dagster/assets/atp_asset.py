@@ -1,0 +1,83 @@
+from dagster import asset, Output
+import pandas as pd
+import tempfile
+import os
+from kaggle.api.kaggle_api_extended import KaggleApi
+import logging
+from project_dagster.partitions import yearly_partitions
+
+logger = logging.getLogger(__name__)
+
+@asset(
+    required_resource_keys={"kaggle_credentials"},
+    description="Télécharge et filtre les données ATP Tennis par année depuis Kaggle",
+    partitions_def=yearly_partitions,
+)
+def atp_data_asset(context):
+    """Télécharge les données ATP Tennis et les filtre selon la partition annuelle"""
+    try:
+        # 1. Récupérer l'année de la partition
+        year = context.partition_key
+        context.log.info(f"Début du traitement pour l'année {year}")
+        
+        # 2. Authentification Kaggle (inchangé)
+        context.log.info("Vérification des credentials Kaggle")
+        context.resources.kaggle_credentials
+        
+        api = KaggleApi()
+        api.authenticate()
+        context.log.info("Authentification Kaggle réussie")
+        
+        # 3. Téléchargement des données (inchangé)
+        dataset = "dissfya/atp-tennis-2000-2023daily-pull"
+        context.log.info(f"Accès au dataset: {dataset}")
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            context.log.info(f"Téléchargement dans le répertoire temporaire: {temp_dir}")
+            api.dataset_download_files(dataset, path=temp_dir, unzip=True)
+            
+            csv_file = next(
+                (os.path.join(temp_dir, f) for f in os.listdir(temp_dir) if f.endswith('.csv')
+            ))
+            if not csv_file:
+                raise ValueError("Aucun fichier CSV trouvé dans le dataset")
+            
+            # 4. Chargement et filtrage des données
+            context.log.info(f"Lecture et filtrage du fichier pour l'année {year}")
+            df = pd.read_csv(csv_file)
+            
+            # Conversion de la colonne de date (format YYYYMMDD)
+            df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d')
+
+            # Filtrage par année de partition
+            df_year = df[df['Date'].dt.year == int(year)].copy()
+            
+            # Optimisation mémoire
+            df_year = reduce_memory_usage(df_year)
+            
+            context.log.info(f"Données filtrées pour {year}. Dimensions: {df_year.shape}")
+            
+            # 5. Retour avec métadonnées enrichies
+            return Output(
+                df_year,
+                metadata={
+                    "num_rows": len(df_year),
+                    "columns": list(df_year.columns),
+                    "année": year,
+                    "période": f"{df_year['Date'].min().date()} to {df_year['Date'].max().date()}",
+                    "tournois": df_year['Tournament'].nunique()
+                }
+            )
+
+    except Exception as e:
+        context.log.error(f"Erreur lors du traitement pour {year}: {str(e)}", exc_info=True)
+        raise
+
+def reduce_memory_usage(df):
+    """Optimise l'utilisation mémoire du DataFrame"""
+    for col in df.columns:
+        if df[col].dtype == 'float64':
+            df[col] = pd.to_numeric(df[col], downcast='float')
+        elif df[col].dtype == 'int64':
+            df[col] = pd.to_numeric(df[col], downcast='integer')
+    return df
