@@ -13,14 +13,17 @@ logger = logging.getLogger(__name__)
     description="Télécharge et filtre les données ATP Tennis par année depuis Kaggle",
     partitions_def=yearly_partitions,
 )
-def atp_data_asset(context):
+def atp_asset(context):
     """Télécharge les données ATP Tennis et les filtre selon la partition annuelle"""
     try:
-        # 1. Récupérer l'année de la partition
+        # Récupérer l'année de la partition
+        if not hasattr(context, 'partition_key'):
+            raise ValueError("Context doesn't have partition_key")
+            
         year = context.partition_key
         context.log.info(f"Début du traitement pour l'année {year}")
         
-        # 2. Authentification Kaggle (inchangé)
+        # Authentification Kaggle (inchangé)
         context.log.info("Vérification des credentials Kaggle")
         context.resources.kaggle_credentials
         
@@ -28,7 +31,7 @@ def atp_data_asset(context):
         api.authenticate()
         context.log.info("Authentification Kaggle réussie")
         
-        # 3. Téléchargement des données (inchangé)
+        # Téléchargement des données (inchangé)
         dataset = "dissfya/atp-tennis-2000-2023daily-pull"
         context.log.info(f"Accès au dataset: {dataset}")
         
@@ -42,7 +45,7 @@ def atp_data_asset(context):
             if not csv_file:
                 raise ValueError("Aucun fichier CSV trouvé dans le dataset")
             
-            # 4. Chargement et filtrage des données
+            # Chargement et filtrage des données
             context.log.info(f"Lecture et filtrage du fichier pour l'année {year}")
             df = pd.read_csv(csv_file)
             
@@ -57,7 +60,7 @@ def atp_data_asset(context):
             
             context.log.info(f"Données filtrées pour {year}. Dimensions: {df_year.shape}")
             
-            # 5. Retour avec métadonnées enrichies
+            # Retour avec métadonnées enrichies
             return Output(
                 df_year,
                 metadata={
@@ -70,7 +73,8 @@ def atp_data_asset(context):
             )
 
     except Exception as e:
-        context.log.error(f"Erreur lors du traitement pour {year}: {str(e)}", exc_info=True)
+        error_year = context.partition_key if hasattr(context, 'partition_key') else 'inconnue'
+        context.log.error(f"Erreur lors du traitement pour {error_year}: {str(e)}", exc_info=True)
         raise
 
 def reduce_memory_usage(df):

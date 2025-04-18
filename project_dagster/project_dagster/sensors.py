@@ -6,10 +6,7 @@ from project_dagster.jobs import atp_elt_job
 
 @sensor(job=atp_elt_job)
 def new_tournament_sensor(context: SensorEvaluationContext):
-    """Détecte les nouveaux tournois ATP dans les données"""
-    
-    # Charger les données existantes (vous pourriez utiliser votre atp_data_asset)
-    # Ici on simule avec un fichier temporaire - à adapter avec votre source réelle
+    # Détecte les nouveaux tournois ATP dans les données
     try:
         df = pd.read_csv('data/atp_data.csv')
         

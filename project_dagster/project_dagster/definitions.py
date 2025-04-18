@@ -4,7 +4,6 @@ from project_dagster.resources import kaggle_credentials_resource
 from project_dagster.jobs import atp_elt_job
 from project_dagster.schedules import daily_schedule
 from project_dagster.sensors import new_tournament_sensor
-# from project_dagster.partitions import yearly_partitions, surface_partitions, year_surface_partitions
 
 # Chargement des assets
 all_assets = load_assets_from_modules(
@@ -17,7 +16,6 @@ resource_defs = {
     "kaggle_credentials": kaggle_credentials_resource,
 }
 
-# Configuration principale CORRIGÉE
 defs = Definitions(
     assets=all_assets,
     resources=resource_defs,
