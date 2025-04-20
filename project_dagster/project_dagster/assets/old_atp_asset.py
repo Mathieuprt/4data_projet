@@ -3,11 +3,9 @@ import pandas as pd
 import tempfile
 import os
 from kaggle.api.kaggle_api_extended import KaggleApi
-import duckdb
-from pathlib import Path
-
 import logging
 from project_dagster.partitions import yearly_partitions
+import duckdb as duckdb
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +24,7 @@ def atp_asset(context):
         year = context.partition_key
         context.log.info(f"Début du traitement pour l'année {year}")
         
-        # Authentification Kaggle
+        # Authentification Kaggle (inchangé)
         context.log.info("Vérification des credentials Kaggle")
         context.resources.kaggle_credentials
         
@@ -34,7 +32,7 @@ def atp_asset(context):
         api.authenticate()
         context.log.info("Authentification Kaggle réussie")
         
-        # Téléchargement des données
+        # Téléchargement des données (inchangé)
         dataset = "dissfya/atp-tennis-2000-2023daily-pull"
         context.log.info(f"Accès au dataset: {dataset}")
         
@@ -43,8 +41,8 @@ def atp_asset(context):
             api.dataset_download_files(dataset, path=temp_dir, unzip=True)
             
             csv_file = next(
-                (os.path.join(temp_dir, f) for f in os.listdir(temp_dir) if f.endswith('.csv'))
-            )
+                (os.path.join(temp_dir, f) for f in os.listdir(temp_dir) if f.endswith('.csv')
+            ))
             if not csv_file:
                 raise ValueError("Aucun fichier CSV trouvé dans le dataset")
             
@@ -52,7 +50,7 @@ def atp_asset(context):
             context.log.info(f"Lecture et filtrage du fichier pour l'année {year}")
             df = pd.read_csv(csv_file)
             
-            # Conversion de la colonne de date
+            # Conversion de la colonne de date (format YYYYMMDD)
             df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d')
 
             # Filtrage par année de partition
@@ -62,18 +60,6 @@ def atp_asset(context):
             df_year = reduce_memory_usage(df_year)
             
             context.log.info(f"Données filtrées pour {year}. Dimensions: {df_year.shape}")
-
-            # Connexion à la base DuckDB et écriture des données
-            base_dir = Path(__file__).resolve().parents[3]  # monte jusqu'à "4DATA_PROJET"
-            duckdb_path = base_dir / "projet_dbt" / "atp_tennis.duckdb"
-
-            # Crée le dossier s'il n'existe pas
-            duckdb_path.parent.mkdir(parents=True, exist_ok=True)
-            context.log.info(f"Insertion des données dans la table DuckDB 'raw_matches' ({duckdb_path})")
-            conn = duckdb.connect(str(duckdb_path))
-            conn.register("df", df_year)
-            conn.execute("CREATE OR REPLACE TABLE raw_matches AS SELECT * FROM df")
-            conn.close()
             
             # Retour avec métadonnées enrichies
             return Output(
