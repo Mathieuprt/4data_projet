@@ -77,7 +77,8 @@ def atp_asset(context):
             conn.execute("""INSERT INTO raw_matches SELECT * FROM df""")
             conn.close()
             
-            # Retour avec métadonnées enrichies
+             # Retour avec métadonnées enrichies
+            context.log.info(f"Fin du traitement pour l'année {year}")
             return Output(
                 df_year,
                 metadata={
