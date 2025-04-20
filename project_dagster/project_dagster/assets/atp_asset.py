@@ -59,7 +59,7 @@ def atp_asset(context):
             df_year = df[df['Date'].dt.year == int(year)].copy()
             
             # Optimisation mémoire
-            df_year = reduce_memory_usage(df_year)
+            # df_year = reduce_memory_usage(df_year)
             
             context.log.info(f"Données filtrées pour {year}. Dimensions: {df_year.shape}")
 
@@ -72,7 +72,8 @@ def atp_asset(context):
             context.log.info(f"Insertion des données dans la table DuckDB 'raw_matches' ({duckdb_path})")
             conn = duckdb.connect(str(duckdb_path))
             conn.register("df", df_year)
-            conn.execute("CREATE OR REPLACE TABLE raw_matches AS SELECT * FROM df")
+            conn.execute("""CREATE TABLE IF NOT EXISTS raw_matches AS SELECT * FROM df WHERE 1=0;""")
+            conn.execute("""INSERT INTO raw_matches SELECT * FROM df""")
             conn.close()
             
             # Retour avec métadonnées enrichies
