@@ -75,7 +75,8 @@ def atp_asset(context):
             conn.execute("CREATE OR REPLACE TABLE raw_matches AS SELECT * FROM df")
             conn.close()
             
-            # Retour avec métadonnées enrichies
+             # Retour avec métadonnées enrichies
+            context.log.info(f"Fin du traitement pour l'année {year}")
             return Output(
                 df_year,
                 metadata={
