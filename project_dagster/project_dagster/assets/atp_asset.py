@@ -12,6 +12,7 @@ from project_dagster.partitions import yearly_partitions
 logger = logging.getLogger(__name__)
 
 @asset(
+    name="atp_asset",
     required_resource_keys={"kaggle_credentials"},
     description="Télécharge et filtre les données ATP Tennis par année depuis Kaggle",
     partitions_def=yearly_partitions,
