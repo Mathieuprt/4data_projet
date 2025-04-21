@@ -3,7 +3,7 @@ from dagster import asset
 from project_dagster.partitions import yearly_partitions
 
 @asset(partitions_def=yearly_partitions)
-def dbt_run():
+def dbt_run(atp_asset):
     result = subprocess.run(
         ['dbt', 'run'],
         capture_output=True,
