@@ -10,7 +10,7 @@ from project_dagster.jobs import atp_elt_job
 # Crée un schedule basé sur la dernière partition disponible
 daily_schedule = build_schedule_from_partitioned_job(
     job=atp_elt_job,
-    cron_schedule="0 18 * * *",  # tous les jours à 18h
+    cron_schedule="0 6 * * *",  # tous les jours à 6h
     execution_timezone="Europe/Paris",
     name="daily_atp_schedule"
 )

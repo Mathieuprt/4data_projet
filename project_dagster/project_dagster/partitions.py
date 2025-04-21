@@ -1,7 +1,7 @@
 from dagster import StaticPartitionsDefinition, MultiPartitionsDefinition
 
-# Partition par année
-years = [str(year) for year in range(2000, 2024)]
+# Partition par année (mettre à jour jusqu'à 2025)
+years = [str(year) for year in range(2000, 2026)]
 yearly_partitions = StaticPartitionsDefinition(years)
 
 # Partition par surface
