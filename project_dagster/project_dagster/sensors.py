@@ -1,4 +1,3 @@
-# sensors/new_tournament_sensor.py
 from dagster import sensor, RunRequest, SkipReason, SensorEvaluationContext
 from kaggle.api.kaggle_api_extended import KaggleApi
 from datetime import datetime, timezone
