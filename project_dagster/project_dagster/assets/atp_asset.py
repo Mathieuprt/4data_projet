@@ -12,6 +12,7 @@ from project_dagster.partitions import yearly_partitions
 logger = logging.getLogger(__name__)
 
 @asset(
+    name="atp_asset",
     required_resource_keys={"kaggle_credentials"},
     description="Télécharge et filtre les données ATP Tennis par année depuis Kaggle",
     partitions_def=yearly_partitions,
@@ -59,7 +60,7 @@ def atp_asset(context):
             df_year = df[df['Date'].dt.year == int(year)].copy()
             
             # Optimisation mémoire
-            df_year = reduce_memory_usage(df_year)
+            # df_year = reduce_memory_usage(df_year)
             
             context.log.info(f"Données filtrées pour {year}. Dimensions: {df_year.shape}")
 

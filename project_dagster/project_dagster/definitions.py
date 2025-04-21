@@ -4,6 +4,7 @@ from project_dagster.resources import kaggle_credentials_resource
 from project_dagster.jobs import atp_elt_job
 from project_dagster.schedules import daily_schedule
 from project_dagster.sensors import new_tournament_sensor
+from project_dagster.loggers import file_logger
 
 # Chargement des assets
 all_assets = load_assets_from_modules(
@@ -22,4 +23,5 @@ defs = Definitions(
     jobs=[atp_elt_job],
     schedules=[daily_schedule],
     sensors=[new_tournament_sensor],
+    loggers={"file": file_logger},  # Ajout du logger personnalisé
 )
