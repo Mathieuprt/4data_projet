@@ -1,50 +1,62 @@
+# project_dagster_tests/test_sensors.py
 from project_dagster.sensors import new_tournament_sensor
 from dagster import RunRequest, SkipReason, build_sensor_context
-from dagster import build_sensor_context
-import pandas as pd
-import os
+from unittest.mock import patch, MagicMock
+from datetime import datetime, timedelta, timezone
+import duckdb
 
-def test_new_tournament_sensor_detects_new_data(tmp_path):
-    # Création d’un fichier CSV avec un tournoi récent
-    recent_date = pd.Timestamp.now().strftime("%Y%m%d")
-    df = pd.DataFrame({
-        "tourney_name": ["ATP Test Open"],
-        "tourney_date": [recent_date],
-    })
-    
-    csv_path = tmp_path / "atp_data.csv"
-    df.to_csv(csv_path, index=False)
+def test_new_tournament_sensor_detects_new_data():
+    recent_date = datetime.now(timezone.utc) - timedelta(days=1)
 
-    original_path = "data/atp_data.csv"
-    os.makedirs("data", exist_ok=True)
-    df.to_csv(original_path, index=False)
+    with patch('project_dagster.sensors.KaggleApi') as mock_kaggle_api:
+        mock_api = MagicMock()
 
-    context = build_sensor_context()
-    result = new_tournament_sensor(context)
+        # Setup dataset mock with required attributes
+        mock_dataset = MagicMock()
+        mock_dataset.ref = "dissfya/atp-tennis-2000-2023daily-pull"
+        mock_dataset.lastUpdated = recent_date
 
-    os.remove(original_path)
+        mock_api.dataset_list.return_value = [mock_dataset]
+        mock_kaggle_api.return_value = mock_api
 
-    assert isinstance(result, RunRequest)
-    assert "new_tournaments" in result.run_key
+        with patch('project_dagster.sensors.duckdb.connect') as mock_duckdb:
+            mock_conn = MagicMock()
+            mock_conn.execute.return_value.fetchone.return_value = [
+                recent_date - timedelta(days=2)
+            ]
+            mock_duckdb.return_value = mock_conn
 
-def test_new_tournament_sensor_skips_when_no_new_data(tmp_path):
-    old_date = (pd.Timestamp.now() - pd.Timedelta(days=10)).strftime("%Y%m%d")
-    df = pd.DataFrame({
-        "tourney_name": ["Old ATP Cup"],
-        "tourney_date": [old_date],
-    })
+            context = build_sensor_context()
+            result = new_tournament_sensor(context)
 
-    csv_path = tmp_path / "atp_data.csv"
-    df.to_csv(csv_path, index=False)
+            assert isinstance(result, RunRequest)
+            assert "kaggle_update" in result.run_key
 
-    original_path = "data/atp_data.csv"
-    os.makedirs("data", exist_ok=True)
-    df.to_csv(original_path, index=False)
 
-    context = build_sensor_context()
-    result = new_tournament_sensor(context)
+def test_new_tournament_sensor_skips_when_no_new_data():
+    old_date = datetime.now(timezone.utc) - timedelta(days=10)
 
-    os.remove(original_path)
+    with patch('project_dagster.sensors.KaggleApi') as mock_kaggle_api, \
+         patch('project_dagster.sensors.Path.exists') as mock_exists, \
+         patch('project_dagster.sensors.duckdb.connect') as mock_duckdb:
 
-    assert isinstance(result, SkipReason)
-    assert "Aucun nouveau tournoi détecté" in result.skip_message
+        mock_api = MagicMock()
+
+        mock_dataset = MagicMock()
+        mock_dataset.ref = "dissfya/atp-tennis-2000-2023daily-pull"
+        mock_dataset.lastUpdated = old_date
+
+        mock_api.dataset_list.return_value = [mock_dataset]
+        mock_kaggle_api.return_value = mock_api
+
+        mock_exists.return_value = True
+
+        mock_conn = MagicMock()
+        mock_conn.execute.return_value.fetchone.return_value = [datetime.now(timezone.utc)]
+        mock_duckdb.return_value = mock_conn
+
+        context = build_sensor_context()
+        result = new_tournament_sensor(context)
+
+        assert isinstance(result, SkipReason)
+        assert "No new data on Kaggle" in result.skip_message
